@@ -48,6 +48,10 @@
             <el-icon><Star /></el-icon>
             <span>我喜欢的</span>
           </el-menu-item>
+          <el-menu-item index="recent-played">
+            <el-icon><Clock /></el-icon>
+            <span>最近播放</span>
+          </el-menu-item>
           <el-menu-item index="most-played">
             <el-icon><TrendCharts /></el-icon>
             <span>热门歌曲</span>
@@ -82,6 +86,7 @@
             :songs="songs"
             :current-song="currentSong"
             :is-playing="isPlaying"
+            :show-played-at="showPlayedAt"
             @play="handlePlay"
             @like="handleLike"
           />
@@ -108,7 +113,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Fold } from '@element-plus/icons-vue'
-import { songApi, playlistApi } from './api'
+import { songApi, playlistApi, playHistoryApi } from './api'
 import Player from './components/Player.vue'
 import SongList from './components/SongList.vue'
 
@@ -116,6 +121,7 @@ const searchKeyword = ref('')
 const activeMenu = ref('all')
 const loading = ref(false)
 const songs = ref([])
+const showPlayedAt = ref(false)
 const playlists = ref([])
 const currentSong = ref(null)
 const isPlaying = ref(false)
@@ -134,12 +140,32 @@ const toggleSidebar = () => {
 
 const loadSongs = async () => {
   loading.value = true
+  showPlayedAt.value = false
   try {
     let response
     if (activeMenu.value === 'all') {
       response = await songApi.getAllSongs()
     } else if (activeMenu.value === 'liked') {
       response = await songApi.getLikedSongs()
+    } else if (activeMenu.value === 'recent-played') {
+      response = await playHistoryApi.getRecentPlayed()
+      showPlayedAt.value = true
+      songs.value = response.data.map(item => ({
+        id: item.songId,
+        title: item.title,
+        artist: item.artist,
+        album: item.album,
+        coverUrl: item.coverUrl,
+        audioUrl: item.audioUrl,
+        duration: item.duration,
+        playCount: item.playCount,
+        likeCount: item.likeCount,
+        genre: item.genre,
+        isLiked: item.isLiked,
+        playedAt: item.playedAt
+      }))
+      loading.value = false
+      return
     } else if (activeMenu.value === 'most-played') {
       response = await songApi.getMostPlayedSongs()
     } else if (activeMenu.value.startsWith('playlist-')) {
