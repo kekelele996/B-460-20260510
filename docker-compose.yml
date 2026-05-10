@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: music-player-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: music_player
+      MYSQL_INITDB_SKIP_TZINFO: 1
+      # 添加字符集环境变量
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # 添加字符集命令参数
+    command: --default-authentication-plugin=mysql_native_password --innodb_buffer_pool_size=256M --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4' --skip-character-set-client-handshake
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - music-player-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: music-player-backend
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/music_player?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src:ro
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+    networks:
+      - music-player-network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: music-player-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    networks:
+      - music-player-network
+
+volumes:
+  mysql_data:
+
+
+networks:
+  music-player-network:
+    driver: bridge
