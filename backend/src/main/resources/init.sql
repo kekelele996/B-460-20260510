@@ -67,6 +67,15 @@ INSERT INTO playlist_songs (playlist_id, song_id, position) VALUES
 -- 周杰伦精选
 (3, 1, 0), (3, 2, 1), (3, 3, 2), (3, 4, 3), (3, 5, 4), (3, 6, 5), (3, 7, 6), (3, 8, 7), (3, 9, 8), (3, 10, 9);
 
+-- 创建最近播放表
+CREATE TABLE IF NOT EXISTS recent_plays (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    song_id BIGINT NOT NULL,
+    played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_song_id (song_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 更新播放列表的歌曲数量
 UPDATE playlists SET song_count = 6 WHERE id = 1;
 UPDATE playlists SET song_count = 10 WHERE id = 2;
