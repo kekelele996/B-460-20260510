@@ -43,6 +43,16 @@ export const songApi = {
   }
 }
 
+export const recentPlayApi = {
+  getRecentPlays() {
+    return api.get('/api/recent-plays')
+  },
+
+  clearRecentPlays() {
+    return api.delete('/api/recent-plays')
+  }
+}
+
 export const playlistApi = {
   getAllPlaylists() {
     return api.get('/api/playlists')

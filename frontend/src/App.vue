@@ -44,6 +44,10 @@
             <el-icon><List /></el-icon>
             <span>全部歌曲</span>
           </el-menu-item>
+          <el-menu-item index="recent">
+            <el-icon><Clock /></el-icon>
+            <span>最近播放</span>
+          </el-menu-item>
           <el-menu-item index="liked">
             <el-icon><Star /></el-icon>
             <span>我喜欢的</span>
@@ -82,6 +86,7 @@
             :songs="songs"
             :current-song="currentSong"
             :is-playing="isPlaying"
+            :show-played-at="activeMenu === 'recent'"
             @play="handlePlay"
             @like="handleLike"
           />
@@ -107,8 +112,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Fold } from '@element-plus/icons-vue'
-import { songApi, playlistApi } from './api'
+import { Fold, Clock } from '@element-plus/icons-vue'
+import { songApi, playlistApi, recentPlayApi } from './api'
 import Player from './components/Player.vue'
 import SongList from './components/SongList.vue'
 
@@ -138,10 +143,29 @@ const loadSongs = async () => {
     let response
     if (activeMenu.value === 'all') {
       response = await songApi.getAllSongs()
+      songs.value = response.data
+    } else if (activeMenu.value === 'recent') {
+      response = await recentPlayApi.getRecentPlays()
+      songs.value = response.data.map(item => ({
+        id: item.songId,
+        title: item.title,
+        artist: item.artist,
+        album: item.album,
+        coverUrl: item.coverUrl,
+        audioUrl: item.audioUrl,
+        duration: item.duration,
+        playCount: item.playCount,
+        likeCount: item.likeCount,
+        genre: item.genre,
+        isLiked: item.isLiked,
+        playedAt: item.playedAt
+      }))
     } else if (activeMenu.value === 'liked') {
       response = await songApi.getLikedSongs()
+      songs.value = response.data
     } else if (activeMenu.value === 'most-played') {
       response = await songApi.getMostPlayedSongs()
+      songs.value = response.data
     } else if (activeMenu.value.startsWith('playlist-')) {
       const playlistId = activeMenu.value.replace('playlist-', '')
       const playlist = await playlistApi.getPlaylistById(playlistId)
@@ -150,8 +174,8 @@ const loadSongs = async () => {
       return
     } else {
       response = await songApi.searchSongs(searchKeyword.value)
+      songs.value = response.data
     }
-    songs.value = response.data
   } catch (error) {
     ElMessage.error('加载歌曲失败')
   } finally {

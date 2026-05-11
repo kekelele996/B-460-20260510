@@ -29,6 +29,11 @@
           {{ formatTime(row.duration) }}
         </template>
       </el-table-column>
+      <el-table-column v-if="showPlayedAt" prop="playedAt" label="播放时间" width="180">
+        <template #default="{ row }">
+          {{ formatPlayedAt(row.playedAt) }}
+        </template>
+      </el-table-column>
       <el-table-column prop="playCount" label="播放次数" width="100" />
       <el-table-column prop="likeCount" label="喜欢数" width="80" />
       <el-table-column label="操作" width="150" fixed="right">
@@ -62,7 +67,11 @@ defineProps({
     default: () => []
   },
   currentSong: Object,
-  isPlaying: Boolean
+  isPlaying: Boolean,
+  showPlayedAt: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const emit = defineEmits(['play', 'like'])
@@ -71,6 +80,18 @@ const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const formatPlayedAt = (playedAt) => {
+  if (!playedAt) return ''
+  const date = new Date(playedAt)
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const seconds = date.getSeconds().toString().padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 const handleRowClick = (row) => {
