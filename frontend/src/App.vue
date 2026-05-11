@@ -52,6 +52,10 @@
             <el-icon><TrendCharts /></el-icon>
             <span>热门歌曲</span>
           </el-menu-item>
+          <el-menu-item index="recent">
+            <el-icon><Clock /></el-icon>
+            <span>最近播放</span>
+          </el-menu-item>
           <el-divider>播放列表</el-divider>
           <el-menu-item
             v-for="playlist in playlists"
@@ -107,7 +111,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Fold } from '@element-plus/icons-vue'
+import { Fold, Clock } from '@element-plus/icons-vue'
 import { songApi, playlistApi } from './api'
 import Player from './components/Player.vue'
 import SongList from './components/SongList.vue'
@@ -142,6 +146,8 @@ const loadSongs = async () => {
       response = await songApi.getLikedSongs()
     } else if (activeMenu.value === 'most-played') {
       response = await songApi.getMostPlayedSongs()
+    } else if (activeMenu.value === 'recent') {
+      response = await songApi.getRecentPlayedSongs()
     } else if (activeMenu.value.startsWith('playlist-')) {
       const playlistId = activeMenu.value.replace('playlist-', '')
       const playlist = await playlistApi.getPlaylistById(playlistId)

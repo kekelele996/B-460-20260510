@@ -40,6 +40,10 @@ export const songApi = {
 
   toggleLike(id) {
     return api.post(`/api/songs/${id}/like`)
+  },
+
+  getRecentPlayedSongs() {
+    return api.get('/api/play-history')
   }
 }
 
