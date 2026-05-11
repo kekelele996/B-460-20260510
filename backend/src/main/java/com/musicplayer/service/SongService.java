@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class SongService {
 
     private final SongRepository songRepository;
+    private final PlayHistoryService playHistoryService;
 
     public List<SongDTO> getAllSongs() {
         log.info("获取所有歌曲");
@@ -63,6 +64,7 @@ public class SongService {
                 .orElseThrow(() -> new RuntimeException("歌曲不存在"));
         song.setPlayCount(song.getPlayCount() + 1);
         songRepository.save(song);
+        playHistoryService.recordPlay(id);
     }
 
     @Transactional

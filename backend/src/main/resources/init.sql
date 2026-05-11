@@ -39,6 +39,15 @@ CREATE TABLE IF NOT EXISTS playlist_songs (
     UNIQUE KEY uk_playlist_song_position (playlist_id, position)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 创建播放历史表
+CREATE TABLE IF NOT EXISTS play_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    song_id BIGINT NOT NULL,
+    played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_song_id (song_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 插入示例歌曲数据（使用本地MP3文件）
 INSERT INTO songs (title, artist, album, cover_url, audio_url, duration, play_count, like_count, genre, is_liked) VALUES
 ('晴天', '周杰伦', '叶惠美', 'https://picsum.photos/seed/song1/300/300', '/api/proxy/audio/1', 269, 12500, 856, '流行', true),

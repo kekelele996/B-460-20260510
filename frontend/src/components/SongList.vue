@@ -30,6 +30,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="playCount" label="播放次数" width="100" />
+      <el-table-column v-if="showPlayedAt" prop="playedAt" label="播放时间" width="180">
+        <template #default="{ row }">
+          {{ formatPlayedAt(row.playedAt) }}
+        </template>
+      </el-table-column>
       <el-table-column prop="likeCount" label="喜欢数" width="80" />
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
@@ -62,7 +67,8 @@ defineProps({
     default: () => []
   },
   currentSong: Object,
-  isPlaying: Boolean
+  isPlaying: Boolean,
+  showPlayedAt: Boolean
 })
 
 const emit = defineEmits(['play', 'like'])
@@ -71,6 +77,26 @@ const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const formatPlayedAt = (playedAt) => {
+  if (!playedAt) return ''
+  const date = new Date(playedAt)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  if (diffMins < 1) return '刚刚'
+  if (diffMins < 60) return `${diffMins}分钟前`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours}小时前`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays < 7) return `${diffDays}天前`
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  const h = String(date.getHours()).padStart(2, '0')
+  const min = String(date.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${d} ${h}:${min}`
 }
 
 const handleRowClick = (row) => {

@@ -72,3 +72,9 @@ export const playlistApi = {
     return api.delete(`/api/playlists/${playlistId}/songs/${songId}`)
   }
 }
+
+export const playHistoryApi = {
+  getRecentPlayed() {
+    return api.get('/api/play-history')
+  }
+}
