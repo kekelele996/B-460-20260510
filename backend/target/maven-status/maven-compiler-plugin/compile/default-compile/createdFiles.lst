@@ -1,0 +1,9 @@
+com/musicplayer/dto/PlaylistDTO.class
+com/musicplayer/repository/PlayHistoryRepository.class
+com/musicplayer/dto/SongDTO.class
+com/musicplayer/entity/PlaylistSong.class
+com/musicplayer/entity/Song.class
+com/musicplayer/MusicPlayerApplication$WebConfig.class
+com/musicplayer/entity/Playlist.class
+com/musicplayer/entity/PlayHistory.class
+com/musicplayer/MusicPlayerApplication.class
